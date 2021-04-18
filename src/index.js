@@ -3,7 +3,7 @@ const { newRecruitsChannel } = require('./channels');
 const { newRecruits, reserves } = require('./roles');
 const { getChannel, getRoleId } = require('./util');
 
-const client = new Client();
+const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
 
 client.login(process.env.BOT_TOKEN);
 
@@ -35,6 +35,7 @@ client.on('message', (message) => {
 
 client.on('messageReactionAdd', async (reaction, user) => {
     const userThatReacted = reaction.message.guild.member(user);
+    console.log('!!!!');
     if (reaction.emoji.name === '👍' && reaction.message.channel.name === newRecruitsChannel) {
         userThatReacted.roles.add(getRoleId(reaction.message, reserves));
         userThatReacted.roles.remove(getRoleId(reaction.message, newRecruits));
