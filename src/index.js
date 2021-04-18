@@ -9,11 +9,11 @@ client.on('ready', () => {
 });
 
 client.on('message', (msg) => {
-    if (msg.content.includes('$bot')) {
+    if (msg.content.includes('!bot')) {
         msg.reply('I am online.');
     }
 
-    if (message.content.startsWith("$kick")) {
+    if (message.content.startsWith("!kick")) {
         var member = message.mentions.members.first();
         msg.reply(`${member.tag}`);
     }
