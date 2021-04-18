@@ -10,6 +10,6 @@ client.on('ready', () => {
 
 client.on('message', (msg) => {
     if (msg.content.includes('bot')) {
-        msg.reply('Did you mention me?');
+        msg.reply('Did you mention me? after heroku');
     }
 });
