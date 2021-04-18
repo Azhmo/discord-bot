@@ -10,6 +10,11 @@ client.on('ready', () => {
 
 client.on('message', (msg) => {
     if (msg.content.includes('bot')) {
-        msg.reply('Did you mention me? after heroku');
+        msg.reply('I am online.');
+    }
+
+    if (message.content.startsWith("kick")) {
+        var member = message.mentions.members.first();
+        msg.reply(`${member}`);
     }
 });
