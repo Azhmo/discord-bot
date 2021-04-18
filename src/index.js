@@ -3,8 +3,6 @@ const { newRecruitsChannel } = require('./channels');
 const { newRecruits, reserves } = require('./roles');
 const { getChannel, getRoleId } = require('./util');
 
-require('dotenv').config();
-
 const client = new Client();
 
 client.login(process.env.BOT_TOKEN);
