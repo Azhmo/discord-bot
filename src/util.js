@@ -7,7 +7,22 @@ const getRoleId = (guild, roleName) => guild.roles.cache.find(role => role.name 
 const addUsernameToColumn = (embedMessage, username, column) => {
     embedMessage.fields.forEach((field) => {
         if (field.name === column && field.value.indexOf(username) === -1) {
+            if (field.value === '-') {
+                field.value = '';
+            }
             field.value += '\n' + username;
+        }
+    });
+
+    return embedMessage;
+};
+const removeValueFromField = (embedMessage, username) => {
+    embedMessage.fields.forEach((field) => {
+        if (field.value.indexOf(username) > -1) {
+            field.value = field.value.replace(username, '');
+            if (field.value === '') {
+                field.value = '-';
+            }
         }
     });
 
@@ -20,3 +35,4 @@ exports.getChannel = getChannel;
 exports.getRoleId = getRoleId;
 exports.addUsernameToColumn = addUsernameToColumn;
 exports.getEmbedFieldValueFromName = getEmbedFieldValueFromName;
+exports.removeValueFromField = removeValueFromField;

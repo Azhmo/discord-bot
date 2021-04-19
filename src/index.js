@@ -1,7 +1,8 @@
 const { Client, MessageEmbed, UserManager } = require('discord.js');
 const { newRecruitsChannel, testChannel, racePollChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
-const { addUsernameToColumn, getChannel, getEmbedFieldValueFromName, getRoleId } = require('./util');
+const { addUsernameToColumn, getChannel, getEmbedFieldValueFromName, getRoleId, removeValueFromField } = require('./util');
+const fetch = require('node-fetch');
 
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
 
@@ -14,6 +15,8 @@ let commonEmbeddedMessage = {
         url: 'https://www.twitch.tv/europeanformularacing',
     },
 }
+let calendarTracks;
+let f1Teams;
 
 client.login(process.env.BOT_TOKEN);
 
@@ -39,43 +42,67 @@ client.on('message', (message) => {
         member.roles.add(getRoleId(message.guild, reserves));
         member.roles.remove(getRoleId(message.guild, newRecruits));
     }
-    // if (message.content === '$test-embed') {
-    //     racePollMessage = {
-    //         title: 'Weekly Race',
-    //         author: {
-    //             name: 'European Formula Racing',
-    //             icon_url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-emoji.png?raw=true',
-    //             url: 'https://www.twitch.tv/europeanformularacing',
-    //         },
-    //         description: `<@&${getRoleId(message, drivers)}> <@&${getRoleId(message, reserves)}> Please vote for participation in the weekly race`,
-    //         color: 0x2ac0f2,
-    //         thumbnail: { url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-icon.png?raw=true' },
-    //         fields: [
-    //             { name: 'Time', value: 'Some time' },
-    //             { name: 'Track', value: 'Some track' },
-    //             { name: 'Accepted', value: '-', inline: true },
-    //             { name: 'Rejected', value: '-', inline: true },
-    //         ],
-    //         timestamp: new Date(),
-    //     }
-    //     getChannel(client, testChannel).send({ embed: racePollMessage }).then(embedMessage => {
-    //         embedMessage.react("✅");
-    //         embedMessage.react("❌");
-    //     });
-    // }
+    if (message.content === '$next-track') {
+        fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
+            response.json().then((tracks) => {
+                fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/teams.json').then(teamsResponse => {
+                    teamsResponse.json().then((teams) => {
+                        f1Teams = teams;
+
+                        calendarTracks = tracks;
+                        const now = Date.now();
+                        let nextTracks = calendarTracks.map((track) => { return { ...track, date: new Date(track.date).getTime() } }).filter((track) => track.date > now);
+                        let nextTracksOrderedByDate = nextTracks.sort((a, b) => a.date - b.date);
+                        let nextTrack = nextTracksOrderedByDate[0];
+                        getChannel(client, testChannel).send(nextTrack.name);
+
+                        racePollMessage = {
+                            title: 'Weekly Race',
+                            author: {
+                                name: 'European Formula Racing',
+                                icon_url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-emoji.png?raw=true',
+                                url: 'https://www.twitch.tv/europeanformularacing',
+                            },
+                            description: `<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}> Please vote for participation in the weekly race`,
+                            color: 0x2ac0f2,
+                            thumbnail: { url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-icon.png?raw=true' },
+                            fields: [
+                                { name: 'Track', value: `${nextTrack.name} ${nextTrack.flag}` },
+                                { name: 'Date', value: `${new Date(nextTrack.date).getDate()} ${new Date(nextTrack.date).toLocaleString('default', { month: 'long' })}` },
+                                { name: 'Time', value: '6 PM ' },
+                                ...f1Teams.map((team) => {
+                                    return {
+                                        name: team.name, value: '-', inline: true
+                                    }
+                                }),
+                                { name: 'Rejected', value: '-' },
+                            ],
+                            timestamp: new Date(),
+                        }
+                        getChannel(client, testChannel).send({ embed: racePollMessage }).then(embedMessage => {
+                            embedMessage.react("✅");
+                            embedMessage.react("❌");
+                        });
+                    })
+                })
+            });
+        });
+    }
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-    // if (reaction.message.channel.name === testChannel && !user.bot) {
-    //     const receivedEmbed = reaction.message.embeds[0];
-    //     if (receivedEmbed) {
+    if (reaction.message.channel.name === testChannel && !user.bot) {
+        const receivedEmbed = reaction.message.embeds[0];
+        if (receivedEmbed) {
+            const nickname = reaction.message.guild.member(user).nickname;
+            console.log(nickname);
+            removeValueFromField(receivedEmbed, nickname);
+            const exampleEmbed = new MessageEmbed(addUsernameToColumn(receivedEmbed, nickname, reaction.emoji.name === "✅" ? nickname.split(" - ")[1] : 'Rejected'));
+            reaction.users.remove(user.id)
 
-    //         const exampleEmbed = new MessageEmbed(addUsernameToColumn(receivedEmbed, user.username, reaction.emoji.name === "✅" ? 'Accepted' : 'Rejected'));
-    //         reaction.users.remove(user.id)
-
-    //         reaction.message.edit(exampleEmbed);
-    //     }
-    // }
+            reaction.message.edit(exampleEmbed);
+        }
+    }
 });
 
 client.on('guildMemberAdd', (member) => {
