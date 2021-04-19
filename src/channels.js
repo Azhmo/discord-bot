@@ -5,6 +5,7 @@ const welcomeChannel = 'welcome';
 const leagueInfoChannel = 'league-info';
 const regulationsChannel = 'regulations';
 const outChannel = 'out';
+const formRegistrationsChannel = 'form-registrations';
 
 exports.newRecruitsChannel = newRecruitsChannel;
 exports.testChannel = testChannel;
@@ -13,3 +14,4 @@ exports.welcomeChannel = welcomeChannel;
 exports.regulationsChannel = regulationsChannel;
 exports.leagueInfoChannel = leagueInfoChannel;
 exports.outChannel = outChannel;
+exports.formRegistrationsChannel = formRegistrationsChannel;

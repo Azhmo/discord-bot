@@ -1,7 +1,7 @@
 const { Client, MessageEmbed, UserManager } = require('discord.js');
-const { newRecruitsChannel, testChannel, racePollChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel } = require('./channels');
+const { newRecruitsChannel, testChannel, racePollChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
-const { addUsernameToColumn, getChannel, getRoleId } = require('./util');
+const { addUsernameToColumn, getChannel, getEmbedFieldValueFromName, getRoleId } = require('./util');
 
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
 
@@ -33,13 +33,18 @@ client.on('message', (message) => {
     if (message.content === '$role-assign') {
         const embed = new MessageEmbed()
             .setTitle('Role assignment')
-            .setDescription(`<@&${getRoleId(message, newRecruits)}> Please fill out this form in order to be placed on the grid: https://forms.gle/hWuyLnq5ww4ebsBd8
-            
-            After you are done with it react with :thumbsup: to have a role assigned.`)
+            .setDescription(`<@&${getRoleId(message.guild, newRecruits)}> Please fill out this form in order to be placed on the grid: https://forms.gle/hWuyLnq5ww4ebsBd8`)
             .setColor(0x2ac0f2)
-        getChannel(client, newRecruitsChannel).send(embed).then(embedMessage => {
-            embedMessage.react("👍");
-        });
+        getChannel(client, newRecruitsChannel).send(embed);
+    }
+
+    if (message.channel.name === formRegistrationsChannel) {
+        const discordUsername = getEmbedFieldValueFromName(message.embeds[0].fields, 'What is your Discord username?');
+        const xboxGamertag = getEmbedFieldValueFromName(message.embeds[0].fields, 'What is your Xbox gamertag?');
+        const member = message.guild.members.cache.find((member) => discordUsername.toLowerCase().indexOf(member.user.username.toLowerCase()) > -1 || member.user.username.toLowerCase().indexOf(discordUsername.toLowerCase()) > -1);
+        member.setNickname(`${xboxGamertag} - Res`);
+        member.roles.add(getRoleId(message.guild, reserves));
+        member.roles.remove(getRoleId(message.guild, newRecruits));
     }
     // if (message.content === '$test-embed') {
     //     racePollMessage = {
@@ -68,11 +73,6 @@ client.on('message', (message) => {
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-    if (reaction.emoji.name === '👍' && reaction.message.channel.name === newRecruitsChannel) {
-        const userThatReacted = reaction.message.guild.member(user);
-        userThatReacted.roles.add(getRoleId(reaction.message, reserves));
-        userThatReacted.roles.remove(getRoleId(reaction.message, newRecruits));
-    }
     if (reaction.message.channel.name === testChannel && !user.bot) {
         welcomeMessage = {
             ...commonEmbeddedMessage,
@@ -114,7 +114,7 @@ client.on('guildMemberAdd', (member) => {
         ],
 
     }
-    member.roles.add(member.guild.roles.cache.find(role => role.name === newRecruits));
+    member.roles.add(getRoleId(member.guild, newRecruits));
     getChannel(client, welcomeChannel).send({ embed: welcomeMessage });
 });
 
