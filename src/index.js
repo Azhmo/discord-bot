@@ -30,13 +30,6 @@ client.on('message', (message) => {
         var member = message.mentions.members.first();
         message.reply(`${member}`);
     }
-    if (message.content === '$role-assign') {
-        const embed = new MessageEmbed()
-            .setTitle('Role assignment')
-            .setDescription(`<@&${getRoleId(message.guild, newRecruits)}> Please fill out this form in order to be placed on the grid: https://forms.gle/hWuyLnq5ww4ebsBd8`)
-            .setColor(0x2ac0f2)
-        getChannel(client, newRecruitsChannel).send(embed);
-    }
 
     if (message.channel.name === formRegistrationsChannel) {
         const discordUsername = getEmbedFieldValueFromName(message.embeds[0].fields, 'What is your Discord username?');
@@ -82,7 +75,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
             fields: [
                 { name: '1. League Info', value: `Please take a look in ${getChannel(client, leagueInfoChannel)}` },
                 { name: '2. Regulations', value: `Check out our ${getChannel(client, regulationsChannel)}` },
-                { name: '3. Role', value: `To have a role assigned please check ${getChannel(client, newRecruitsChannel)}` },
+                { name: '3. Role', value: `To have a role assigned please complete this form: https://forms.gle/hWuyLnq5ww4ebsBd8` },
             ],
 
         }
