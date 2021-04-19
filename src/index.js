@@ -1,5 +1,5 @@
 const { Client, MessageEmbed, UserManager } = require('discord.js');
-const { newRecruitsChannel, testChannel, racePollChannel, leagueInfoChannel, regulationsChannel, outChannel } = require('./channels');
+const { newRecruitsChannel, testChannel, racePollChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
 const { addUsernameToColumn, getChannel, getRoleId } = require('./util');
 
@@ -114,9 +114,9 @@ client.on('guildMemberAdd', (member) => {
         ],
 
     }
-    getChannel(client, testChannel).send({ embed: welcomeMessage });
+    getChannel(client, welcomeChannel).send({ embed: welcomeMessage });
 });
 
 client.on('guildMemberRemove', (member) => {
-    getChannel(client, outChannel).send(`**${member.user.username}** has left`);
+    getChannel(client, outChannel).send(`**${member.user.tag}** has left`);
 })
