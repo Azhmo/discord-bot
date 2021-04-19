@@ -66,22 +66,6 @@ client.on('message', (message) => {
 });
 
 client.on('messageReactionAdd', async (reaction, user) => {
-    if (reaction.message.channel.name === testChannel && !user.bot) {
-        welcomeMessage = {
-            ...commonEmbeddedMessage,
-            description: `Welcome <@${user.id}> to **${reaction.message.guild.name}** !`,
-            thumbnail: { url: `${user.displayAvatarURL()}` },
-            color: 0xf7c701,
-            fields: [
-                { name: '1. League Info', value: `Please take a look in ${getChannel(client, leagueInfoChannel)}` },
-                { name: '2. Regulations', value: `Check out our ${getChannel(client, regulationsChannel)}` },
-                { name: '3. Role', value: `To have a role assigned please complete this form: https://forms.gle/hWuyLnq5ww4ebsBd8` },
-            ],
-
-        }
-        getChannel(client, testChannel).send({ embed: welcomeMessage });
-    }
-
     // if (reaction.message.channel.name === testChannel && !user.bot) {
     //     const receivedEmbed = reaction.message.embeds[0];
     //     if (receivedEmbed) {
@@ -103,7 +87,7 @@ client.on('guildMemberAdd', (member) => {
         fields: [
             { name: '1. League Info', value: `Please take a look in ${getChannel(client, leagueInfoChannel)}` },
             { name: '2. Regulations', value: `Check out our ${getChannel(client, regulationsChannel)}` },
-            { name: '3. Role', value: `To have a role assigned please check ${getChannel(client, newRecruitsChannel)}` },
+            { name: '3. Role', value: `To have a role assigned please complete this form: https://forms.gle/hWuyLnq5ww4ebsBd8` },
         ],
 
     }
