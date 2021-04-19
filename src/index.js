@@ -114,6 +114,7 @@ client.on('guildMemberAdd', (member) => {
         ],
 
     }
+    member.user.roles.add(member.guild.roles.cache.find(role => role.name === newRecruits));
     getChannel(client, welcomeChannel).send({ embed: welcomeMessage });
 });
 
