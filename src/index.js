@@ -1,7 +1,7 @@
 const { Client, MessageEmbed, UserManager } = require('discord.js');
 const { newRecruitsChannel, testChannel, racePollChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
-const { addUsernameToColumn, getChannel, getEmbedFieldValueFromName, getRoleId, removeValueFromField } = require('./util');
+const { addUsernameToColumn, getChannel, getEmbedFieldValueFromName, getRoleId, removeValueFromField, removeValueFromRejected } = require('./util');
 const fetch = require('node-fetch');
 
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
@@ -69,13 +69,29 @@ client.on('message', (message) => {
                             fields: [
                                 { name: 'Track', value: `${nextTrack.name} ${nextTrack.flag}` },
                                 { name: 'Date', value: `${new Date(nextTrack.date).getDate()} ${new Date(nextTrack.date).toLocaleString('default', { month: 'long' })}` },
-                                { name: 'Time', value: '6 PM ' },
-                                ...f1Teams.map((team) => {
-                                    return {
-                                        name: team.name, value: '-', inline: true
-                                    }
-                                }),
+                                { name: 'Time', value: '6 PM' },
+                                { name: 'Mercedes', value: '-', inline: true },
+                                { name: 'Ferrari', value: '-', inline: true },
+                                { name: 'Red Bull', value: '-', inline: true },
+                                { name: 'Renault', value: '-', inline: true },
+                                { name: 'Alpha Tauri', value: '-', inline: true },
+                                { name: 'McLaren', value: 'asdasd - McLaren', inline: true },
+                                { name: 'Haas', value: '-', inline: true },
+                                { name: 'Williams', value: '-', inline: true },
+                                { name: 'Alfa Romeo', value: '-', inline: true },
+                                { name: 'Racing Point', value: '-', inline: true },
                                 { name: 'Rejected', value: '-' },
+                                // fields: [
+                                //     { name: 'Track', value: `${nextTrack.name} ${nextTrack.flag}` },
+                                //     { name: 'Date', value: `${new Date(nextTrack.date).getDate()} ${new Date(nextTrack.date).toLocaleString('default', { month: 'long' })}` },
+                                //     { name: 'Time', value: '6 PM ' },
+                                //     ...f1Teams.map((team) => {
+                                //         return {
+                                //             name: team.name, value: '-', inline: true
+                                //         }
+                                //     }),
+                                //     { name: 'Rejected', value: '-' },
+                                // ],
                             ],
                             timestamp: new Date(),
                         }
@@ -95,12 +111,17 @@ client.on('messageReactionAdd', async (reaction, user) => {
         const receivedEmbed = reaction.message.embeds[0];
         if (receivedEmbed) {
             const nickname = reaction.message.guild.member(user).nickname;
-            console.log(nickname);
-            removeValueFromField(receivedEmbed, nickname);
-            const exampleEmbed = new MessageEmbed(addUsernameToColumn(receivedEmbed, nickname, reaction.emoji.name === "✅" ? nickname.split(" - ")[1] : 'Rejected'));
-            reaction.users.remove(user.id)
-
-            reaction.message.edit(exampleEmbed);
+            let newEmbed;
+            if (reaction.emoji.name === "❌") {
+                removeValueFromField(receivedEmbed, nickname);
+                newEmbed = new MessageEmbed(addUsernameToColumn(receivedEmbed, nickname, 'Rejected'));
+            }
+            if (reaction.emoji.name === "✅") {
+                removeValueFromRejected(receivedEmbed, nickname);
+                newEmbed = new MessageEmbed(addUsernameToColumn(receivedEmbed, nickname, nickname.split(" - ")[1]));
+            }
+            reaction.users.remove(user.id);
+            reaction.message.edit(newEmbed);
         }
     }
 });

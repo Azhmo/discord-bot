@@ -29,6 +29,19 @@ const removeValueFromField = (embedMessage, username) => {
     return embedMessage;
 };
 
+const removeValueFromRejected = (embedMessage, username) => {
+    embedMessage.fields.forEach((field) => {
+        if (field.name === 'Rejected' && field.value.indexOf(username) > -1) {
+            field.value = field.value.replace(username, '');
+            if (field.value === '') {
+                field.value = '-';
+            }
+        }
+    });
+
+    return embedMessage;
+};
+
 const getEmbedFieldValueFromName = (fields, fieldName) => fields.filter((field) => field.name === fieldName)[0].value;
 
 exports.getChannel = getChannel;
@@ -36,3 +49,4 @@ exports.getRoleId = getRoleId;
 exports.addUsernameToColumn = addUsernameToColumn;
 exports.getEmbedFieldValueFromName = getEmbedFieldValueFromName;
 exports.removeValueFromField = removeValueFromField;
+exports.removeValueFromRejected = removeValueFromRejected;
