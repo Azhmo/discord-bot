@@ -43,7 +43,7 @@ client.on('message', (message) => {
         member.roles.add(getRoleId(message.guild, reserves));
         member.roles.remove(getRoleId(message.guild, newRecruits));
 
-        getChannel(client, chatChannel).send(`Everyone, let's welcome <@${member.user.id}> !`,);
+        getChannel(client, chatChannel).send(`Let's give a warm welcome to our newest member, <@${member.user.id}> !`,);
     }
     if (message.content === '$next-track') {
         fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
