@@ -7,7 +7,7 @@ const fetch = require('node-fetch');
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
 
 let racePollMessage;
-let newRacePollMessage;
+let nextTrack;
 let commonEmbeddedMessage = {
     author: {
         name: 'European Formula Racing',
@@ -30,6 +30,20 @@ client.on('message', (message) => {
         message.reply('I am online.');
     }
 
+    if (message.content.includes('$next-track')) {
+        fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
+            response.json().then((tracks) => {
+                const now = Date.now();
+                let nextTracks = tracks.map((track) => { return { ...track, date: new Date(track.date).getTime() } }).filter((track) => track.date > now);
+                let nextTracksOrderedByDate = nextTracks.sort((a, b) => a.date - b.date);
+                nextTrack = nextTracksOrderedByDate[0];
+
+                message.reply(`the next race is held in ${nextTrack.name} ${nextTrack.flag}`);
+                message.delete();
+            })
+        });
+    }
+
     if (message.content.startsWith("$kick")) {
         var member = message.mentions.members.first();
         message.reply(`${member}`);
@@ -43,9 +57,9 @@ client.on('message', (message) => {
         member.roles.add(getRoleId(message.guild, reserves));
         member.roles.remove(getRoleId(message.guild, newRecruits));
 
-        getChannel(client, chatChannel).send(`Let's give a warm welcome to our newest member, <@${member.user.id}> !`,);
+        getChannel(client, chatChannel).send(`Let's give a warm welcome to our newest member, <@${member.user.id}> !`);
     }
-    if (message.content === '$next-track') {
+    if (message.content === '$race-poll') {
         fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
             response.json().then((tracks) => {
                 fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/teams.json').then(teamsResponse => {
@@ -74,7 +88,6 @@ client.on('message', (message) => {
                         let nextTracks = calendarTracks.map((track) => { return { ...track, date: new Date(track.date).getTime() } }).filter((track) => track.date > now);
                         let nextTracksOrderedByDate = nextTracks.sort((a, b) => a.date - b.date);
                         let nextTrack = nextTracksOrderedByDate[0];
-                        getChannel(client, testChannel).send(nextTrack.name);
 
                         racePollMessage = {
                             title: 'Weekly Race',
