@@ -1,5 +1,5 @@
 const { Client, MessageEmbed, UserManager } = require('discord.js');
-const { newRecruitsChannel, testChannel, racePollChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel } = require('./channels');
+const { newRecruitsChannel, testChannel, racePollChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
 const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn } = require('./util');
 const fetch = require('node-fetch');
