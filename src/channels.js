@@ -6,6 +6,7 @@ const leagueInfoChannel = 'league-info';
 const regulationsChannel = 'regulations';
 const outChannel = 'out';
 const formRegistrationsChannel = 'form-registrations';
+const chatChannel = '🗣chat';
 
 exports.newRecruitsChannel = newRecruitsChannel;
 exports.testChannel = testChannel;

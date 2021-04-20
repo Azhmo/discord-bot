@@ -1,7 +1,7 @@
 const { Client, MessageEmbed, UserManager } = require('discord.js');
 const { newRecruitsChannel, testChannel, racePollChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
-const { addUsernameToColumn, getChannel, getEmbedFieldValueFromName, getRoleId, removeValueFromField, removeValueFromRejected } = require('./util');
+const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn } = require('./util');
 const fetch = require('node-fetch');
 
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
@@ -17,6 +17,7 @@ let commonEmbeddedMessage = {
 }
 let calendarTracks;
 let f1Teams;
+let raceGrid;
 
 client.login(process.env.BOT_TOKEN);
 
@@ -41,6 +42,8 @@ client.on('message', (message) => {
         member.setNickname(`${xboxGamertag} - Res`);
         member.roles.add(getRoleId(message.guild, reserves));
         member.roles.remove(getRoleId(message.guild, newRecruits));
+
+        getChannel(client, chatChannel).send(`Everyone, let's welcome <@${member.user.id}> !`,);
     }
     if (message.content === '$next-track') {
         fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
@@ -48,6 +51,23 @@ client.on('message', (message) => {
                 fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/teams.json').then(teamsResponse => {
                     teamsResponse.json().then((teams) => {
                         f1Teams = teams;
+                        raceGrid = f1Teams.map((team, index) => {
+                            return {
+                                name: team.name,
+                                drivers: [],
+                                inline: index < f1Teams.length - 1
+                            }
+                        });
+                        raceGrid.push({
+                            name: 'Reserves',
+                            drivers: [],
+                            inline: true,
+                        });
+                        raceGrid.push({
+                            name: 'Not participating',
+                            drivers: [],
+                            inline: true,
+                        });
 
                         calendarTracks = tracks;
                         const now = Date.now();
@@ -70,28 +90,12 @@ client.on('message', (message) => {
                                 { name: 'Track', value: `${nextTrack.name} ${nextTrack.flag}` },
                                 { name: 'Date', value: `${new Date(nextTrack.date).getDate()} ${new Date(nextTrack.date).toLocaleString('default', { month: 'long' })}` },
                                 { name: 'Time', value: '6 PM' },
-                                { name: 'Mercedes', value: '-', inline: true },
-                                { name: 'Ferrari', value: '-', inline: true },
-                                { name: 'Red Bull', value: '-', inline: true },
-                                { name: 'Renault', value: '-', inline: true },
-                                { name: 'Alpha Tauri', value: '-', inline: true },
-                                { name: 'McLaren', value: 'asdasd - McLaren', inline: true },
-                                { name: 'Haas', value: '-', inline: true },
-                                { name: 'Williams', value: '-', inline: true },
-                                { name: 'Alfa Romeo', value: '-', inline: true },
-                                { name: 'Racing Point', value: '-', inline: true },
-                                { name: 'Rejected', value: '-' },
-                                // fields: [
-                                //     { name: 'Track', value: `${nextTrack.name} ${nextTrack.flag}` },
-                                //     { name: 'Date', value: `${new Date(nextTrack.date).getDate()} ${new Date(nextTrack.date).toLocaleString('default', { month: 'long' })}` },
-                                //     { name: 'Time', value: '6 PM ' },
-                                //     ...f1Teams.map((team) => {
-                                //         return {
-                                //             name: team.name, value: '-', inline: true
-                                //         }
-                                //     }),
-                                //     { name: 'Rejected', value: '-' },
-                                // ],
+                                ...raceGrid.map((team) => {
+                                    return {
+                                        ...team,
+                                        value: '-',
+                                    }
+                                })
                             ],
                             timestamp: new Date(),
                         }
@@ -109,17 +113,34 @@ client.on('message', (message) => {
 client.on('messageReactionAdd', async (reaction, user) => {
     if (reaction.message.channel.name === testChannel && !user.bot) {
         const receivedEmbed = reaction.message.embeds[0];
+        const nickname = reaction.message.guild.member(user).nickname;
+        const usersTeam = nickname.split(" - ")[1];
+        const isReserve = usersTeam === 'Res';
+        const userWhoVoted = {
+            id: user.id,
+            nickname,
+        };
+        let newEmbed;
+
+        //remove from team
+        raceGrid.forEach((team) => {
+            if (team.drivers.find((driver) => driver.id === userWhoVoted.id)) {
+                team.drivers = team.drivers.filter((driver) => driver.id !== userWhoVoted.id);
+            }
+        });
+
+        if (reaction.emoji.name === "❌") {
+            //add to rejected columns
+            addUserToColumn(raceGrid, 'Not participating', userWhoVoted);
+        }
+
+        if (reaction.emoji.name === "✅") {
+            //add to team
+            addUserToColumn(raceGrid, isReserve ? 'Reserves' : usersTeam, userWhoVoted);
+        }
+
         if (receivedEmbed) {
-            const nickname = reaction.message.guild.member(user).nickname;
-            let newEmbed;
-            if (reaction.emoji.name === "❌") {
-                removeValueFromField(receivedEmbed, nickname);
-                newEmbed = new MessageEmbed(addUsernameToColumn(receivedEmbed, nickname, 'Rejected'));
-            }
-            if (reaction.emoji.name === "✅") {
-                removeValueFromRejected(receivedEmbed, nickname);
-                newEmbed = new MessageEmbed(addUsernameToColumn(receivedEmbed, nickname, nickname.split(" - ")[1]));
-            }
+            newEmbed = new MessageEmbed(updateEmbedMessage(receivedEmbed, raceGrid));
             reaction.users.remove(user.id);
             reaction.message.edit(newEmbed);
         }
