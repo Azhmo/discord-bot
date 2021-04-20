@@ -31,7 +31,6 @@ client.on('message', (message) => {
     }
 
     if (message.content === '$next-track') {
-        console.log(message.content);
         fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
             response.json().then((tracks) => {
                 const now = Date.now();
@@ -40,6 +39,7 @@ client.on('message', (message) => {
                 nextTrack = nextTracksOrderedByDate[0];
 
                 message.reply(`the next race is held in ${nextTrack.name} ${nextTrack.flag}`);
+                message.delete();
             })
         });
     }
