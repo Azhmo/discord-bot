@@ -16,3 +16,4 @@ exports.regulationsChannel = regulationsChannel;
 exports.leagueInfoChannel = leagueInfoChannel;
 exports.outChannel = outChannel;
 exports.formRegistrationsChannel = formRegistrationsChannel;
+exports.chatChannel = chatChannel;
