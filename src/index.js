@@ -1,5 +1,5 @@
-const { Client, MessageEmbed, UserManager } = require('discord.js');
-const { newRecruitsChannel, testChannel, racePollChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel } = require('./channels');
+const { Client, MessageEmbed } = require('discord.js');
+const { testChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
 const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn } = require('./util');
 const fetch = require('node-fetch');
@@ -26,10 +26,6 @@ client.on('ready', () => {
 });
 
 client.on('message', (message) => {
-    if (message.content.includes('$bot')) {
-        message.reply('I am online.');
-    }
-
     if (message.content === '$next-track') {
         fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
             response.json().then((tracks) => {
@@ -44,11 +40,6 @@ client.on('message', (message) => {
         });
     }
 
-    if (message.content.startsWith("$kick")) {
-        var member = message.mentions.members.first();
-        message.reply(`${member}`);
-    }
-
     if (message.channel.name === formRegistrationsChannel) {
         const discordUsername = getEmbedFieldValueFromName(message.embeds[0].fields, 'What is your Discord username?');
         const xboxGamertag = getEmbedFieldValueFromName(message.embeds[0].fields, 'What is your Xbox gamertag?');
@@ -59,7 +50,7 @@ client.on('message', (message) => {
 
         getChannel(client, chatChannel).send(`Let's give a warm welcome to our newest member, <@${member.user.id}> !`);
     }
-    if (message.content === '$race-poll') {
+    if (message.content === '$race-poll-test') {
         fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
             response.json().then((tracks) => {
                 fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/teams.json').then(teamsResponse => {
@@ -90,12 +81,7 @@ client.on('message', (message) => {
                         let nextTrack = nextTracksOrderedByDate[0];
 
                         racePollMessage = {
-                            title: 'Weekly Race',
-                            author: {
-                                name: 'European Formula Racing',
-                                icon_url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-emoji.png?raw=true',
-                                url: 'https://www.twitch.tv/europeanformularacing',
-                            },
+                            ...commonEmbeddedMessage,
                             description: `<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}> Please vote for participation in the weekly race`,
                             color: 0x2ac0f2,
                             thumbnail: { url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-icon.png?raw=true' },
@@ -115,6 +101,45 @@ client.on('message', (message) => {
                         getChannel(client, testChannel).send({ embed: racePollMessage }).then(embedMessage => {
                             embedMessage.react("✅");
                             embedMessage.react("❌");
+                            const filter = (reaction, user) => !user.bot;
+                            collector = embedMessage.createReactionCollector(filter, { time: 15000 });
+
+                            collector.on('collect', (reaction, user) => {
+                                console.log("collect");
+                                const receivedEmbed = reaction.message.embeds[0];
+                                const nickname = reaction.message.guild.member(user).nickname;
+                                const usersTeam = nickname.split(" - ")[1];
+                                const isReserve = usersTeam === 'Res';
+                                const userWhoVoted = {
+                                    id: user.id,
+                                    nickname,
+                                };
+                                let newEmbed;
+
+                                //remove from team
+                                raceGrid.forEach((team) => {
+                                    if (team.drivers.find((driver) => driver.id === userWhoVoted.id)) {
+                                        team.drivers = team.drivers.filter((driver) => driver.id !== userWhoVoted.id);
+                                    }
+                                });
+
+                                if (reaction.emoji.name === "❌") {
+                                    //add to rejected columns
+                                    addUserToColumn(raceGrid, 'Not participating', userWhoVoted);
+                                }
+
+                                if (reaction.emoji.name === "✅") {
+                                    //add to team
+                                    addUserToColumn(raceGrid, isReserve ? 'Reserves' : usersTeam, userWhoVoted);
+                                }
+
+                                if (receivedEmbed) {
+                                    newEmbed = new MessageEmbed(updateEmbedMessage(receivedEmbed, raceGrid));
+                                    reaction.users.remove(user.id);
+                                    console.log('start')
+                                    reaction.message.edit(newEmbed).then(() => console.log('end'));
+                                }
+                            });
                         });
                     })
                 })
@@ -123,47 +148,9 @@ client.on('message', (message) => {
     }
 });
 
-client.on('messageReactionAdd', async (reaction, user) => {
-    if (reaction.message.channel.name === testChannel && !user.bot) {
-        const receivedEmbed = reaction.message.embeds[0];
-        const nickname = reaction.message.guild.member(user).nickname;
-        const usersTeam = nickname.split(" - ")[1];
-        const isReserve = usersTeam === 'Res';
-        const userWhoVoted = {
-            id: user.id,
-            nickname,
-        };
-        let newEmbed;
-
-        //remove from team
-        raceGrid.forEach((team) => {
-            if (team.drivers.find((driver) => driver.id === userWhoVoted.id)) {
-                team.drivers = team.drivers.filter((driver) => driver.id !== userWhoVoted.id);
-            }
-        });
-
-        if (reaction.emoji.name === "❌") {
-            //add to rejected columns
-            addUserToColumn(raceGrid, 'Not participating', userWhoVoted);
-        }
-
-        if (reaction.emoji.name === "✅") {
-            //add to team
-            addUserToColumn(raceGrid, isReserve ? 'Reserves' : usersTeam, userWhoVoted);
-        }
-
-        if (receivedEmbed) {
-            newEmbed = new MessageEmbed(updateEmbedMessage(receivedEmbed, raceGrid));
-            reaction.users.remove(user.id);
-            reaction.message.edit(newEmbed);
-        }
-    }
-});
-
 client.on('guildMemberAdd', (member) => {
     welcomeMessage = {
         ...commonEmbeddedMessage,
-        description: `Welcome <@${member.user.id}> to **${member.guild.name}** !`,
         thumbnail: { url: `${member.user.displayAvatarURL()}` },
         color: 0xf7c701,
         fields: [
@@ -174,7 +161,8 @@ client.on('guildMemberAdd', (member) => {
 
     }
     member.roles.add(getRoleId(member.guild, newRecruits));
-    getChannel(client, welcomeChannel).send({ embed: welcomeMessage });
+    //user mention only work in message content, not embed
+    getChannel(client, welcomeChannel).send({ embed: welcomeMessage, content: `Welcome <@${member.user.id}> to **${member.guild.name}** !` });
 });
 
 client.on('guildMemberRemove', (member) => {

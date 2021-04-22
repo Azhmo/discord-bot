@@ -6,14 +6,14 @@ const updateEmbedMessage = (embedMessage, raceGrid) => {
         embedMessage.fields[1],
         embedMessage.fields[2],
         ...raceGrid.map((team) => {
+            console.log(team);
             return {
                 name: team.name,
-                value: team.drivers.length ? team.drivers.map((driver) => driver.nickname).join('\n') : '-',
+                value: team.drivers.length > 0 ? team.drivers.map((driver) => driver.nickname).join('\n') : '-',
                 inline: team.inline,
             }
         })
     ]
-
     return embedMessage;
 }
 

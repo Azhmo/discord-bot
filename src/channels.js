@@ -1,4 +1,3 @@
-const newRecruitsChannel = 'new-recruits';
 const testChannel = 'test-bot-discord-js';
 const racePollChannel = 'race-poll';
 const welcomeChannel = 'welcome';
@@ -8,7 +7,6 @@ const outChannel = 'out';
 const formRegistrationsChannel = 'form-registrations';
 const chatChannel = '🗣chat';
 
-exports.newRecruitsChannel = newRecruitsChannel;
 exports.testChannel = testChannel;
 exports.racePollChannel = racePollChannel;
 exports.welcomeChannel = welcomeChannel;
