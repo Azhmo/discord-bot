@@ -50,7 +50,7 @@ client.on('message', (message) => {
 
         getChannel(client, chatChannel).send(`Let's give a warm welcome to our newest member, <@${member.user.id}> !`);
     }
-    if (message.content === '$race-poll-test') {
+    if (message.content === '$race-poll') {
         fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
             response.json().then((tracks) => {
                 fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/teams.json').then(teamsResponse => {
@@ -82,7 +82,7 @@ client.on('message', (message) => {
 
                         racePollMessage = {
                             ...commonEmbeddedMessage,
-                            description: `<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}> Please vote for participation in the weekly race`,
+                            description: `Please vote for participation in the weekly race`,
                             color: 0x2ac0f2,
                             thumbnail: { url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-icon.png?raw=true' },
                             fields: [
@@ -98,15 +98,17 @@ client.on('message', (message) => {
                             ],
                             timestamp: new Date(),
                         }
-                        getChannel(client, testChannel).send({ embed: racePollMessage }).then(embedMessage => {
+                        getChannel(client, testChannel).send({ embed: racePollMessage, content: `<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}>` }).then(embedMessage => {
                             embedMessage.react("✅");
                             embedMessage.react("❌");
                             const filter = (reaction, user) => !user.bot;
                             collector = embedMessage.createReactionCollector(filter, { time: 15000 });
+                            let receivedEmbed;
+                            let message;
 
                             collector.on('collect', (reaction, user) => {
                                 console.log("collect");
-                                const receivedEmbed = reaction.message.embeds[0];
+                                receivedEmbed = reaction.message.embeds[0];
                                 const nickname = reaction.message.guild.member(user).nickname;
                                 const usersTeam = nickname.split(" - ")[1];
                                 const isReserve = usersTeam === 'Res';
@@ -136,9 +138,14 @@ client.on('message', (message) => {
                                 if (receivedEmbed) {
                                     newEmbed = new MessageEmbed(updateEmbedMessage(receivedEmbed, raceGrid));
                                     reaction.users.remove(user.id);
-                                    console.log('start')
-                                    reaction.message.edit(newEmbed).then(() => console.log('end'));
+                                    reaction.message.edit(newEmbed).then((newMessage) => message = newMessage);
                                 }
+                            });
+
+                            collector.on('end', () => {
+                                embedMessage.reactions.removeAll();
+                                newEmbed = new MessageEmbed(receivedEmbed).setDescription('This is the grid for the next race.');
+                                message.edit(newEmbed);
                             });
                         });
                     })
