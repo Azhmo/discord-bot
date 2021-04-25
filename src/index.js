@@ -1,7 +1,7 @@
 const { Client, MessageEmbed } = require('discord.js');
 const { testChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
-const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn } = require('./util');
+const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn, getDays } = require('./util');
 const fetch = require('node-fetch');
 
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
@@ -107,7 +107,6 @@ client.on('message', (message) => {
                             let message;
 
                             collector.on('collect', (reaction, user) => {
-                                console.log("collect");
                                 receivedEmbed = reaction.message.embeds[0];
                                 const nickname = reaction.message.guild.member(user).nickname;
                                 const usersTeam = nickname.split(" - ")[1];
@@ -144,7 +143,7 @@ client.on('message', (message) => {
 
                             collector.on('end', () => {
                                 embedMessage.reactions.removeAll();
-                                newEmbed = new MessageEmbed(receivedEmbed).setDescription('This is the grid for the next race.');
+                                newEmbed = new MessageEmbed(receivedEmbed).setDescription('Voting has finished.\nThis is the grid for the next race.');
                                 message.edit(newEmbed);
                             });
                         });

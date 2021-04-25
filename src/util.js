@@ -6,7 +6,6 @@ const updateEmbedMessage = (embedMessage, raceGrid) => {
         embedMessage.fields[1],
         embedMessage.fields[2],
         ...raceGrid.map((team) => {
-            console.log(team);
             return {
                 name: team.name,
                 value: team.drivers.length > 0 ? team.drivers.map((driver) => driver.nickname).join('\n') : '-',
@@ -26,8 +25,11 @@ const addUserToColumn = (raceGrid, columnName, userWhoVoted) => {
 
 const getEmbedFieldValueFromName = (fields, fieldName) => fields.filter((field) => field.name === fieldName)[0].value;
 
+const getDays = (days) => days * 1000 * 360 * 24;
+
 exports.getChannel = getChannel;
 exports.getRoleId = getRoleId;
 exports.updateEmbedMessage = updateEmbedMessage;
 exports.getEmbedFieldValueFromName = getEmbedFieldValueFromName;
 exports.addUserToColumn = addUserToColumn;
+exports.getDays = getDays;
