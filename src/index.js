@@ -51,6 +51,7 @@ client.on('message', (message) => {
         getChannel(client, chatChannel).send(`Let's give a warm welcome to our newest member, <@${member.user.id}> !`);
     }
     if (message.content === '$race-poll') {
+        message.delete();
         fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
             response.json().then((tracks) => {
                 fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/teams.json').then(teamsResponse => {

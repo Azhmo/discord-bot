@@ -1,4 +1,5 @@
 const testChannel = 'test-bot-discord-js';
+const practiceChannel = 'practice';
 const racePollChannel = 'race-poll';
 const welcomeChannel = 'welcome';
 const leagueInfoChannel = 'league-info';
@@ -15,3 +16,4 @@ exports.leagueInfoChannel = leagueInfoChannel;
 exports.outChannel = outChannel;
 exports.formRegistrationsChannel = formRegistrationsChannel;
 exports.chatChannel = chatChannel;
+exports.practiceChannel = practiceChannel;
