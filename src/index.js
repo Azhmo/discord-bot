@@ -60,7 +60,7 @@ client.on('message', (message) => {
                         raceGrid = f1Teams.map((team, index) => {
                             return {
                                 name: team.name,
-                                drivers: [{ id: index, username: 'asdasd' }],
+                                drivers: [],
                                 inline: index < f1Teams.length - 1
                             }
                         });
