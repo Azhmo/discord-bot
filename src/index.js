@@ -1,7 +1,7 @@
 const { Client, MessageEmbed } = require('discord.js');
 const { testChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel, practiceChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
-const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn, getDays } = require('./util');
+const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn, getDays, makeGrid } = require('./util');
 const fetch = require('node-fetch');
 
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
@@ -60,7 +60,7 @@ client.on('message', (message) => {
                         raceGrid = f1Teams.map((team, index) => {
                             return {
                                 name: team.name,
-                                drivers: [],
+                                drivers: [{ id: index, username: 'asdasd' }],
                                 inline: index < f1Teams.length - 1
                             }
                         });
@@ -103,7 +103,7 @@ client.on('message', (message) => {
                             embedMessage.react("✅");
                             embedMessage.react("❌");
                             const filter = (reaction, user) => !user.bot;
-                            collector = embedMessage.createReactionCollector(filter, { time: getDays(4) });
+                            collector = embedMessage.createReactionCollector(filter, { time: getDays(1) });
                             let receivedEmbed;
                             let message;
 
@@ -111,10 +111,11 @@ client.on('message', (message) => {
                                 receivedEmbed = reaction.message.embeds[0];
                                 const nickname = reaction.message.guild.member(user).nickname;
                                 const usersTeam = nickname.split(" - ")[1];
+                                const username = nickname.split(" - ")[0];
                                 const isReserve = usersTeam === 'Res';
                                 const userWhoVoted = {
                                     id: user.id,
-                                    nickname,
+                                    username,
                                 };
                                 let newEmbed;
 
@@ -144,8 +145,10 @@ client.on('message', (message) => {
 
                             collector.on('end', () => {
                                 embedMessage.reactions.removeAll();
-                                newEmbed = new MessageEmbed(receivedEmbed).setDescription('Voting has finished.\nThis is the grid for the next race.');
-                                message.edit(newEmbed);
+                                newEmbed = new MessageEmbed(makeGrid(receivedEmbed, raceGrid)).setDescription('Voting has finished, here is the grid for the next race.\nReact with ✅ if you would like to fill any last-minute empty seats');
+                                message.edit(newEmbed).then((message) => {
+                                    message.react("✅")
+                                });
                             });
                         });
                     })

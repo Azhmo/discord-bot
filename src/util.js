@@ -8,7 +8,7 @@ const updateEmbedMessage = (embedMessage, raceGrid) => {
         ...raceGrid.map((team) => {
             return {
                 name: team.name,
-                value: team.drivers.length > 0 ? team.drivers.map((driver) => driver.nickname).join('\n') : '-',
+                value: team.drivers.length > 0 ? team.drivers.map((driver) => driver.username).join('\n') : '-',
                 inline: team.inline,
             }
         })
@@ -25,7 +25,23 @@ const addUserToColumn = (raceGrid, columnName, userWhoVoted) => {
 
 const getEmbedFieldValueFromName = (fields, fieldName) => fields.filter((field) => field.name === fieldName)[0].value;
 
-const getDays = (days) => days * 1000 * 360 * 24;
+const makeGrid = (embedMessage, raceGrid) => {
+    const reserves = raceGrid.filter((grid) => grid.name === 'Reserves');
+    const teams = raceGrid.filter((grid) => grid.name !== 'Reserves' && grid.name !== 'Not participating');
+    let teamsWithAvailableSeat = teams.filter((team) => team.drivers.length < 2);
+    reserves[0].drivers.forEach((reserve, index) => {
+        if (teamsWithAvailableSeat.length > 0) {
+            reserves[0].drivers[index] = undefined;
+            teamsWithAvailableSeat[0].drivers.push(reserve);
+            teamsWithAvailableSeat = teamsWithAvailableSeat.filter((team) => team.drivers.length < 2);
+        }
+    });
+    reserves[0].drivers = reserves[0].drivers.filter((driver) => !!driver);
+
+    return updateEmbedMessage(embedMessage, [...teams, ...reserves]);
+}
+
+const getDays = (days) => days * 1000 * 3600 * 24;
 
 exports.getChannel = getChannel;
 exports.getRoleId = getRoleId;
@@ -33,3 +49,4 @@ exports.updateEmbedMessage = updateEmbedMessage;
 exports.getEmbedFieldValueFromName = getEmbedFieldValueFromName;
 exports.addUserToColumn = addUserToColumn;
 exports.getDays = getDays;
+exports.makeGrid = makeGrid;
