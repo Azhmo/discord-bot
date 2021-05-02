@@ -1,5 +1,5 @@
 const { Client, MessageEmbed } = require('discord.js');
-const { testChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel, practiceChannel } = require('./channels');
+const { testChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel, practiceChannel, racePollChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
 const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn, getDays, makeGrid } = require('./util');
 const fetch = require('node-fetch');
@@ -99,11 +99,11 @@ client.on('message', (message) => {
                             ],
                             timestamp: new Date(),
                         }
-                        getChannel(client, practiceChannel).send({ embed: racePollMessage, content: `<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}>` }).then(embedMessage => {
+                        getChannel(client, racePollChannel).send({ embed: racePollMessage, content: `<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}>` }).then(embedMessage => {
                             embedMessage.react("✅");
                             embedMessage.react("❌");
                             const filter = (reaction, user) => !user.bot;
-                            collector = embedMessage.createReactionCollector(filter, { time: getDays(1) });
+                            collector = embedMessage.createReactionCollector(filter, { time: getDays(5) });
                             let receivedEmbed;
                             let message;
 
