@@ -103,7 +103,7 @@ client.on('message', (message) => {
                             embedMessage.react("✅");
                             embedMessage.react("❌");
                             const filter = (reaction, user) => !user.bot;
-                            collector = embedMessage.createReactionCollector(filter, { time: getDays(5) });
+                            collector = embedMessage.createReactionCollector(filter, { time: getDays(3.5) });
                             let receivedEmbed;
                             let message;
 
