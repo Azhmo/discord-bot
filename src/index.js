@@ -18,11 +18,19 @@ let commonEmbeddedMessage = {
 let calendarTracks;
 let f1Teams;
 let raceGrid;
+let messageThatWasReactedOn;
 
 client.login(process.env.BOT_TOKEN);
 
 client.on('ready', () => {
     console.log('The bot is ready');
+    setTimeout(() => {
+        messageThatWasReactedOn.reactions.removeAll();
+        newEmbed = new MessageEmbed(makeGrid(messageThatWasReactedOn.embeds[0], raceGrid)).setDescription('Voting has finished, here is the grid for the next race.\nReact with ✅ if you would like to fill any last-minute empty seats');
+        messageThatWasReactedOn.edit(newEmbed).then((message) => {
+            message.react("✅")
+        });
+    }, getDays(3));
 });
 
 client.on('message', (message) => {
@@ -177,4 +185,71 @@ client.on('guildMemberAdd', (member) => {
 
 client.on('guildMemberRemove', (member) => {
     getChannel(client, outChannel).send(`**${member.user.tag}** has left`);
+});
+
+client.on('messageReactionAdd', async (reaction, user) => {
+    if (reaction.message.channel.name === racePollChannel) {
+        const guildMembers = reaction.message.guild.members.cache
+        const nickname = reaction.message.guild.member(user).nickname;
+        messageThatWasReactedOn = await reaction.message.channel.messages.fetch(reaction.message.id);
+        const receivedEmbed = messageThatWasReactedOn.embeds[0];
+        const usersTeam = nickname.split(" - ")[1];
+        const username = nickname.split(" - ")[0];
+        const isReserve = usersTeam === 'Res';
+        const userWhoVoted = {
+            id: user.id,
+            username,
+        };
+        let newEmbed;
+        reaction.users.remove(user.id);
+        const fields = messageThatWasReactedOn.embeds[0].fields;
+        if (!raceGrid) {
+            raceGrid = fields.map((field) => field).filter((field) => field.name !== 'Track' && field.name !== 'Time' && field.name !== 'Date').map((field) => {
+                const drivers = field.value.split('\n');
+
+                return {
+                    name: field.name,
+                    drivers: drivers.map((driver) => {
+                        const memberFound = guildMembers.find((member) => {
+                            if (member.nickname) {
+                                return member.nickname.indexOf(driver) > -1;
+                            }
+                        })
+
+                        if (memberFound) {
+                            return {
+                                id: memberFound.user.id,
+                                username: memberFound.nickname.split(' - ')[0],
+                            }
+                        }
+                    }).filter((driver) => driver !== undefined),
+                    inline: field.inline,
+                }
+            });
+        } else {
+            //remove from team
+            raceGrid.forEach((team) => {
+                if (team.drivers.find((driver) => driver.id === userWhoVoted.id)) {
+                    team.drivers = team.drivers.filter((driver) => driver.id !== userWhoVoted.id);
+                }
+            });
+
+            if (reaction.emoji.name === "❌") {
+                //add to rejected columns
+                addUserToColumn(raceGrid, 'Not participating', userWhoVoted);
+            }
+
+            if (reaction.emoji.name === "✅") {
+                //add to team
+                addUserToColumn(raceGrid, isReserve ? 'Reserves' : usersTeam, userWhoVoted);
+            }
+
+            if (receivedEmbed) {
+                newEmbed = new MessageEmbed(updateEmbedMessage(receivedEmbed, raceGrid));
+                reaction.users.remove(user.id);
+                reaction.message.edit(newEmbed);
+                // getChannel(client, testChannel).send({ embed: newEmbed });
+            }
+        }
+    }
 })
