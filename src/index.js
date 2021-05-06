@@ -29,7 +29,7 @@ client.on('ready', () => {
             message.react("✅");
             votingFinished = true;
         });
-    }, getDays(1 / 48));
+    }, 60000);
 });
 
 client.on('message', (message) => {
