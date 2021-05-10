@@ -131,7 +131,6 @@ client.on('messageReactionAdd', async (reaction, user) => {
             id: user.id,
             username,
         };
-        reaction.users.remove(user.id);
         if (!raceGrid) {
             raceGrid = mapFieldsToGrid(receivedEmbed, guildMembers);
         }
