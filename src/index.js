@@ -1,7 +1,7 @@
 const { Client, MessageEmbed } = require('discord.js');
 const { testChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel, practiceChannel, racePollChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
-const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn, getDays, makeGrid, mapFieldsToGrid, mapTeamsToGrid, getNextTrack } = require('./util');
+const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn, getDays, makeGrid, mapFieldsToGrid, mapTeamsToGrid, getNextTrack, shouldEndVote } = require('./util');
 const fetch = require('node-fetch');
 
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
@@ -17,19 +17,23 @@ let commonEmbeddedMessage = {
 }
 let raceGrid;
 let messageThatWasReactedOn;
+let nextTrack;
 
 client.login(process.env.BOT_TOKEN);
 
 client.on('ready', () => {
     console.log('The bot is ready');
-    setTimeout(() => {
-        messageThatWasReactedOn.reactions.removeAll();
-        newEmbed = new MessageEmbed(makeGrid(messageThatWasReactedOn.embeds[0], raceGrid)).setDescription('Voting has finished, here is the grid for the next race.\nReact with ✅ if you would like to fill any last-minute empty seats');
-        messageThatWasReactedOn.edit(newEmbed).then((message) => {
-            message.react("✅");
-            votingFinished = true;
-        });
-    }, 60000);
+    setInterval(() => {
+        if (shouldEndVote(nextTrack)) {
+            console.log('vote ended');
+            messageThatWasReactedOn.reactions.removeAll();
+            newEmbed = new MessageEmbed(makeGrid(messageThatWasReactedOn.embeds[0], raceGrid)).setDescription('Voting has finished, here is the grid for the next race.\nReact with ✅ if you would like to fill any last-minute empty seats');
+            messageThatWasReactedOn.edit(newEmbed).then((message) => {
+                message.react("✅");
+                votingFinished = true;
+            });
+        }
+    }, getDays(1 / 24));
 });
 
 client.on('message', (message) => {
@@ -55,17 +59,18 @@ client.on('message', (message) => {
         getChannel(client, chatChannel).send(`Let's give a warm welcome to our newest member, <@${member.user.id}> !`);
     }
     if (message.content === '$race-poll') {
+        votingFinished = false;
         message.delete();
         fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
             response.json().then((tracks) => {
                 fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/teams.json').then(teamsResponse => {
                     teamsResponse.json().then((teams) => {
                         raceGrid = mapTeamsToGrid(teams);
-                        const nextTrack = getNextTrack(tracks);
+                        nextTrack = getNextTrack(tracks);
 
                         racePollMessage = {
                             ...commonEmbeddedMessage,
-                            description: `Please vote for participation in the weekly race`,
+                            description: 'Please vote for participation in the weekly race.\n Vote ends Friday 12 PM',
                             color: 0x2ac0f2,
                             thumbnail: { url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-icon.png?raw=true' },
                             fields: [

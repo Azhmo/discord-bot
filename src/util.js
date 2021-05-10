@@ -28,7 +28,8 @@ const mapFieldsToGrid = (embedMessage, guildMembers) => {
             //find driver id and username
             drivers: drivers.map((driver) => {
                 const memberFound = guildMembers.find((member) => {
-                    if (member.nickname) {
+                    //check if there is a '-' as empty driver
+                    if (member.nickname && driver !== '-') {
                         return member.nickname.indexOf(driver) > -1;
                     }
                 })
@@ -100,6 +101,14 @@ const getNextTrack = (tracks) => {
     return nextTracksOrderedByDate[0];
 }
 
+const shouldEndVote = (nextTrack) => {
+    const now = Date.now();
+    const date = now.getDate();
+    const hour = now.getHours();
+    const nextTrackDate = new Date(nextTrack.date).getDate();
+    return nextTrackDate === date && hour === 11;
+}
+
 const getDays = (days) => days * 1000 * 3600 * 24;
 
 exports.getChannel = getChannel;
@@ -112,3 +121,4 @@ exports.makeGrid = makeGrid;
 exports.mapFieldsToGrid = mapFieldsToGrid;
 exports.mapTeamsToGrid = mapTeamsToGrid;
 exports.getNextTrack = getNextTrack;
+exports.shouldEndVote = shouldEndVote;
