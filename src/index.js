@@ -23,6 +23,12 @@ client.login(process.env.BOT_TOKEN);
 
 client.on('ready', () => {
     console.log('The bot is ready');
+    fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
+        response.json().then((tracks) => {
+            nextTrack = getNextTrack(tracks);
+            console.log(nextTrack.name);
+        })
+    });
     setInterval(() => {
         if (shouldEndVote(nextTrack)) {
             console.log('vote ended');
@@ -40,7 +46,7 @@ client.on('message', (message) => {
     if (message.content === '$next-track') {
         fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
             response.json().then((tracks) => {
-                const nextTrack = getNextTrack(tracks);
+                nextTrack = getNextTrack(tracks);
 
                 message.reply(`the next race is held in ${nextTrack.name} ${nextTrack.flag}`);
                 message.delete();
