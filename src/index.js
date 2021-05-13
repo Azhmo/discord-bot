@@ -37,6 +37,7 @@ client.on('ready', () => {
             messageThatWasReactedOn.edit(newEmbed).then((message) => {
                 message.react("✅");
                 votingFinished = true;
+                getChannel(client, chatChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}> Race poll has ended. Grid is available in ${getChannel(client, racePollChannel)}`);
             });
         }
     }, getDays(1 / 24));
