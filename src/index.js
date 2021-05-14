@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
 
-let votingFinished = false;
+let votingFinished;
 let racePollMessage;
 let commonEmbeddedMessage = {
     author: {
@@ -29,18 +29,19 @@ client.on('ready', () => {
             console.log(nextTrack.name);
         })
     });
-    setInterval(() => {
-        if (shouldEndVote(nextTrack)) {
-            console.log('vote ended');
-            messageThatWasReactedOn.reactions.removeAll();
-            newEmbed = new MessageEmbed(makeGrid(messageThatWasReactedOn.embeds[0], raceGrid)).setDescription('Voting has finished, here is the grid for the next race.\nReact with ✅ if you would like to fill any last-minute empty seats');
-            messageThatWasReactedOn.edit(newEmbed).then((message) => {
-                message.react("✅");
-                votingFinished = true;
-                getChannel(client, chatChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}> Race poll has ended. Grid is available in ${getChannel(client, racePollChannel)}`);
-            });
-        }
-    }, getDays(1 / 24));
+    votingFinished = true;
+    // setInterval(() => {
+    //     if (shouldEndVote(nextTrack)) {
+    //         console.log('vote ended');
+    //         messageThatWasReactedOn.reactions.removeAll();
+    //         newEmbed = new MessageEmbed(makeGrid(messageThatWasReactedOn.embeds[0], raceGrid)).setDescription('Voting has finished, here is the grid for the next race.\nReact with ✅ if you would like to fill any last-minute empty seats');
+    //         messageThatWasReactedOn.edit(newEmbed).then((message) => {
+    //             message.react("✅");
+    //             votingFinished = true;
+    //             getChannel(client, chatChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}> Race poll has ended. Grid is available in ${getChannel(client, racePollChannel)}`);
+    //         });
+    //     }
+    // }, getDays(1 / 24));
 });
 
 client.on('message', (message) => {

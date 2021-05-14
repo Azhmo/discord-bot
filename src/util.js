@@ -105,7 +105,6 @@ const shouldEndVote = (nextTrack) => {
     const now = new Date();
     const date = now.getDate();
     const hour = now.getHours();
-    console.log(hour);
     const nextTrackDate = new Date(nextTrack.date).getDate();
     return nextTrackDate === date && hour === 11;
 }
