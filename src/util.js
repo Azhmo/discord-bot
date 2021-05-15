@@ -7,7 +7,7 @@ const updateEmbedMessage = (embedMessage, raceGrid) => {
         embedMessage.fields[2],
         ...raceGrid.map((team) => {
             return {
-                name: team.name,
+                name: `${getEmoji(team.name)} ${team.name}`,
                 value: team.drivers.length > 0 ? team.drivers.map((driver) => driver.username).join('\n') : '-',
                 inline: team.inline,
             }
@@ -16,15 +16,44 @@ const updateEmbedMessage = (embedMessage, raceGrid) => {
     return embedMessage;
 }
 
+const getEmoji = (teamName) => {
+    const emojiList = [
+        '<:ferrari:843212002364882986>',
+        '<:mercedes:843211983745843241>',
+        '<:alphatauri:843225114271416400>',
+        '<:renault:843217119906627586>',
+        '<:mclaren:843212127773917205>',
+        '<:williams:843217071261483008>',
+        '<:alfaromeo:843211936916570191>',
+        '<:haas:843212018768281601>',
+        '<:racingpoint:843212059013414942>',
+        '<:redbull:843212058975666246>',
+        ':no_entry:',
+        ':blue_circle:',
+    ];
+
+    return emojiList.find((emoji) => {
+        let emojiToSearchFor = '';
+
+        if (teamName === 'Not participating') {
+            emojiToSearchFor = 'no_entry';
+        } else if (teamName === 'Reserves') {
+            emojiToSearchFor = 'blue_circle';
+        } else emojiToSearchFor = teamName.toLowerCase().split(' ').join('');
+
+        return emoji.indexOf(emojiToSearchFor) > -1
+    }) || '';
+}
+
 const mapFieldsToGrid = (embedMessage, guildMembers) => {
     const fields = embedMessage.fields;
     //exclude other fields
     return fields.map((field) => field).filter((field) => field.name !== 'Track' && field.name !== 'Time' && field.name !== 'Date').map((field) => {
         // get drivers username
         const drivers = field.value.split('\n');
-
         return {
-            name: field.name,
+            //map only team name (remove emoji from name)
+            name: field.name.indexOf('<:') > -1 ? field.name.split('>')[1].trim() : field.name.split(':')[2].trim(),
             //find driver id and username
             drivers: drivers.map((driver) => {
                 const memberFound = guildMembers.find((member) => {
@@ -122,3 +151,4 @@ exports.mapFieldsToGrid = mapFieldsToGrid;
 exports.mapTeamsToGrid = mapTeamsToGrid;
 exports.getNextTrack = getNextTrack;
 exports.shouldEndVote = shouldEndVote;
+exports.getEmoji = getEmoji;

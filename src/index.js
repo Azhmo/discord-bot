@@ -1,7 +1,7 @@
 const { Client, MessageEmbed } = require('discord.js');
 const { testChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel, practiceChannel, racePollChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
-const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn, getDays, makeGrid, mapFieldsToGrid, mapTeamsToGrid, getNextTrack, shouldEndVote } = require('./util');
+const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn, getDays, makeGrid, mapFieldsToGrid, mapTeamsToGrid, getNextTrack, shouldEndVote, getEmoji } = require('./util');
 const fetch = require('node-fetch');
 
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
@@ -86,6 +86,7 @@ client.on('message', (message) => {
                                 ...raceGrid.map((team) => {
                                     return {
                                         ...team,
+                                        name: `${getEmoji(team.name)} ${team.name}`,
                                         value: '-',
                                     }
                                 })
