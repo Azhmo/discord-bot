@@ -53,7 +53,7 @@ const mapFieldsToGrid = (embedMessage, guildMembers) => {
         const drivers = field.value.split('\n');
         return {
             //map only team name (remove emoji from name)
-            name: field.name.indexOf('<:') > -1 ? field.name.split('>')[1].trim() : field.name.split(':')[2].trim(),
+            name: field.name.indexOf('<:') > -1 ? field.name.split('>')[1].trim() : (field.name.split(':')[2] ? field.name.split(':')[2].trim() : field.name),
             //find driver id and username
             drivers: drivers.map((driver) => {
                 const memberFound = guildMembers.find((member) => {
