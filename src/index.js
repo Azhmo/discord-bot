@@ -26,22 +26,20 @@ client.on('ready', () => {
     fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
         response.json().then((tracks) => {
             nextTrack = getNextTrack(tracks);
-            console.log(nextTrack.name);
         })
     });
-    votingFinished = true;
-    // setInterval(() => {
-    //     if (shouldEndVote(nextTrack)) {
-    //         console.log('vote ended');
-    //         messageThatWasReactedOn.reactions.removeAll();
-    //         newEmbed = new MessageEmbed(makeGrid(messageThatWasReactedOn.embeds[0], raceGrid)).setDescription('Voting has finished, here is the grid for the next race.\nReact with ✅ if you would like to fill any last-minute empty seats');
-    //         messageThatWasReactedOn.edit(newEmbed).then((message) => {
-    //             message.react("✅");
-    //             votingFinished = true;
-    //             getChannel(client, chatChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}> Race poll has ended. Grid is available in ${getChannel(client, racePollChannel)}`);
-    //         });
-    //     }
-    // }, getDays(1 / 24));
+    setInterval(() => {
+        if (shouldEndVote(nextTrack)) {
+            console.log('vote ended');
+            messageThatWasReactedOn.reactions.removeAll();
+            newEmbed = new MessageEmbed(makeGrid(messageThatWasReactedOn.embeds[0], raceGrid)).setDescription('Voting has finished, here is the grid for the next race.\nReact with ✅ if you would like to fill any last-minute empty seats');
+            messageThatWasReactedOn.edit(newEmbed).then((message) => {
+                message.react("✅");
+                votingFinished = true;
+                getChannel(client, chatChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}> Race poll has ended. Grid is available in ${getChannel(client, racePollChannel)}`);
+            });
+        }
+    }, getDays(1 / 24));
 });
 
 client.on('message', (message) => {
@@ -78,13 +76,13 @@ client.on('message', (message) => {
 
                         racePollMessage = {
                             ...commonEmbeddedMessage,
-                            description: 'Please vote for participation in the weekly race.\n Vote ends Friday 12 PM',
+                            description: 'Please vote for participation in the weekly race.\n Vote ends Friday 12 PM BST',
                             color: 0x2ac0f2,
                             thumbnail: { url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-icon.png?raw=true' },
                             fields: [
                                 { name: 'Track', value: `${nextTrack.name} ${nextTrack.flag}` },
                                 { name: 'Date', value: `${new Date(nextTrack.date).getDate()} ${new Date(nextTrack.date).toLocaleString('default', { month: 'long' })}` },
-                                { name: 'Time', value: '6 PM' },
+                                { name: 'Time', value: '6 PM BST' },
                                 ...raceGrid.map((team) => {
                                     return {
                                         ...team,
