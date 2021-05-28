@@ -28,8 +28,15 @@ const getEmoji = (teamName) => {
         '<:haas:843212018768281601>',
         '<:racingpoint:843212059013414942>',
         '<:redbull:843212058975666246>',
+        '<:green_flag:847925591184375859>',
+        '<:intermediate_tyre:847931248991273042>',
+        '<:wet_tyre:847931217541857350>',
+        '<:medium_tyre:847931282541248587>',
+        '<:soft_tyre:847931282988990495>',
+        '<:hard_tyre:847931283039584306>',
         ':no_entry:',
         ':blue_circle:',
+        ':green_circle:',
     ];
 
     return emojiList.find((emoji) => {

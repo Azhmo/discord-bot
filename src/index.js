@@ -1,5 +1,5 @@
 const { Client, MessageEmbed } = require('discord.js');
-const { testChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel, practiceChannel, racePollChannel } = require('./channels');
+const { testChannel, leagueInfoChannel, regulationsChannel, outChannel, welcomeChannel, formRegistrationsChannel, chatChannel, practiceChannel, racePollChannel, leagueWebsiteChannel, standingsChannel } = require('./channels');
 const { newRecruits, reserves, drivers } = require('./roles');
 const { getChannel, getEmbedFieldValueFromName, getRoleId, updateEmbedMessage, addUserToColumn, getDays, makeGrid, mapFieldsToGrid, mapTeamsToGrid, getNextTrack, shouldEndVote, getEmoji } = require('./util');
 const fetch = require('node-fetch');
@@ -7,7 +7,6 @@ const fetch = require('node-fetch');
 const client = new Client({ partials: ['USER', 'GUILD_MEMBER', 'MESSAGE', 'CHANNEL', 'REACTION'] });
 
 let votingFinished;
-let racePollMessage;
 let commonEmbeddedMessage = {
     author: {
         name: 'European Formula Racing',
@@ -54,6 +53,14 @@ client.on('message', (message) => {
         });
     }
 
+    if (message.channel.name === standingsChannel) {
+        if (message.content.indexOf('Standings of') > -1) {
+            setTimeout(() => {
+                getChannel(client, chatChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}> General standings updated in ${getChannel(client, leagueWebsiteChannel)}`);
+            }, 60000 * 5)
+        }
+    }
+
     if (message.channel.name === formRegistrationsChannel) {
         const discordUsername = getEmbedFieldValueFromName(message.embeds[0].fields, 'What is your Discord username?');
         const xboxGamertag = getEmbedFieldValueFromName(message.embeds[0].fields, 'What is your Xbox gamertag?');
@@ -64,43 +71,57 @@ client.on('message', (message) => {
 
         getChannel(client, chatChannel).send(`Let's give a warm welcome to our newest member, <@${member.user.id}> !`);
     }
-    if (message.content === '$race-poll') {
-        votingFinished = false;
-        message.delete();
-        fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
-            response.json().then((tracks) => {
-                fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/teams.json').then(teamsResponse => {
-                    teamsResponse.json().then((teams) => {
-                        raceGrid = mapTeamsToGrid(teams);
-                        nextTrack = getNextTrack(tracks);
 
-                        racePollMessage = {
-                            ...commonEmbeddedMessage,
-                            description: 'Please vote for participation in the weekly race.\n Vote ends Friday 12 PM BST',
-                            color: 0x2ac0f2,
-                            thumbnail: { url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-icon.png?raw=true' },
-                            fields: [
-                                { name: 'Track', value: `${nextTrack.name} ${nextTrack.flag}` },
-                                { name: 'Date', value: `${new Date(nextTrack.date).getDate()} ${new Date(nextTrack.date).toLocaleString('default', { month: 'long' })}` },
-                                { name: 'Time', value: '6 PM BST' },
-                                ...raceGrid.map((team) => {
-                                    return {
-                                        ...team,
-                                        name: `${getEmoji(team.name)} ${team.name}`,
-                                        value: '-',
-                                    }
-                                })
-                            ],
-                            timestamp: new Date(),
-                        }
-                        getChannel(client, racePollChannel).send({ embed: racePollMessage, content: `<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}>` }).then(embedMessage => {
-                            embedMessage.react("✅");
-                            embedMessage.react("❌");
-                        });
+    if (message.member.hasPermission('ADMINISTRATOR')) {
+
+        if (message.content === '$start') {
+            getChannel(client, racePollChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}>\n${getEmoji('green_flag')} Let's gooo !! ${getEmoji('green_flag')}`);
+            message.delete();
+        }
+
+        if (message.content === '$ready') {
+            getChannel(client, racePollChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}>\n${getEmoji('wet_tyre')}${getEmoji('intermediate_tyre')}${getEmoji('hard_tyre')}${getEmoji('medium_tyre')}${getEmoji('soft_tyre')}\nReady up !!`);
+            message.delete();
+        }
+
+        if (message.content === '$race-poll') {
+            votingFinished = false;
+            message.delete();
+            fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/tracks.json').then(response => {
+                response.json().then((tracks) => {
+                    fetch('https://raw.githubusercontent.com/Azhmo/efr/master/src/data/teams.json').then(teamsResponse => {
+                        teamsResponse.json().then((teams) => {
+                            raceGrid = mapTeamsToGrid(teams);
+                            nextTrack = getNextTrack(tracks);
+
+                            const racePollMessage = {
+                                ...commonEmbeddedMessage,
+                                description: 'Please vote for participation in the weekly race.\n Vote ends Friday 12 PM BST',
+                                color: 0x2ac0f2,
+                                thumbnail: { url: 'https://github.com/Azhmo/efr/blob/master/src/assets/EFR-icon.png?raw=true' },
+                                fields: [
+                                    { name: 'Track', value: `${nextTrack.name} ${nextTrack.flag}` },
+                                    { name: 'Date', value: `${new Date(nextTrack.date).getDate()} ${new Date(nextTrack.date).toLocaleString('default', { month: 'long' })}` },
+                                    { name: 'Time', value: '6 PM BST' },
+                                    ...raceGrid.map((team) => {
+                                        return {
+                                            ...team,
+                                            name: `${getEmoji(team.name)} ${team.name}`,
+                                            value: '-',
+                                        }
+                                    })
+                                ],
+                                timestamp: new Date(),
+                            }
+                            getChannel(client, racePollChannel).send({ embed: racePollMessage, content: `<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}>` }).then(embedMessage => {
+                                embedMessage.react("✅");
+                                embedMessage.react("❌");
+                            });
+                        })
                     })
-                })
+                });
             });
-        });
+        }
     }
 });
 

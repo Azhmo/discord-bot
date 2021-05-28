@@ -1,12 +1,14 @@
 const testChannel = 'test-bot-discord-js';
 const practiceChannel = 'practice';
 const racePollChannel = 'race-poll';
+const leagueWebsiteChannel = 'league-website';
 const welcomeChannel = 'welcome';
 const leagueInfoChannel = 'league-info';
 const regulationsChannel = 'regulations';
 const outChannel = 'out';
 const formRegistrationsChannel = 'form-registrations';
 const chatChannel = '🗣chat';
+const standingsChannel = 'standings';
 
 exports.testChannel = testChannel;
 exports.racePollChannel = racePollChannel;
@@ -17,3 +19,5 @@ exports.outChannel = outChannel;
 exports.formRegistrationsChannel = formRegistrationsChannel;
 exports.chatChannel = chatChannel;
 exports.practiceChannel = practiceChannel;
+exports.leagueWebsiteChannel = leagueWebsiteChannel;
+exports.standingsChannel = standingsChannel;
