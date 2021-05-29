@@ -34,6 +34,8 @@ const getEmoji = (teamName) => {
         '<:medium_tyre:847931282541248587>',
         '<:soft_tyre:847931282988990495>',
         '<:hard_tyre:847931283039584306>',
+        '<:clean:848208902650331176>',
+        '<:red_flag:848219377161601046>',
         ':no_entry:',
         ':blue_circle:',
         ':green_circle:',

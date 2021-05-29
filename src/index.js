@@ -73,6 +73,10 @@ client.on('message', (message) => {
     }
 
     if (message.member.hasPermission('ADMINISTRATOR')) {
+        if (message.content === '$restart') {
+            getChannel(client, racePollChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}>\n${getEmoji('red_flag')} Lobby restart !! ${getEmoji('red_flag')}`);
+            message.delete();
+        }
 
         if (message.content === '$start') {
             getChannel(client, racePollChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}>\n${getEmoji('green_flag')} Let's gooo !! ${getEmoji('green_flag')}`);
