@@ -72,7 +72,7 @@ client.on('message', (message) => {
         getChannel(client, chatChannel).send(`Let's give a warm welcome to our newest member, <@${member.user.id}> !`);
     }
 
-    if (message.member.hasPermission('ADMINISTRATOR')) {
+    if (message.member && message.member.hasPermission('ADMINISTRATOR')) { //message might be sent by bot
         if (message.content === '$restart') {
             getChannel(client, racePollChannel).send(`<@&${getRoleId(message.guild, drivers)}> <@&${getRoleId(message.guild, reserves)}>\n${getEmoji('red_flag')} Lobby restart !! ${getEmoji('red_flag')}`);
             message.delete();
