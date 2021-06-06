@@ -160,8 +160,8 @@ client.on('guildMemberRemove', (member) => {
 client.on('messageReactionAdd', async (reaction, user) => {
     if (reaction.message.channel.name === racePollChannel && !user.bot && !votingFinished) {
         const guildMembers = reaction.message.guild.members.cache
-        const nickname = reaction.message.guild.member(user).nickname;
-        const roles = reaction.message.guild.member(user).roles.cache.map((role) => role.name);
+        const nickname = guildMembers.get(user.id).nickname;
+        const roles = guildMembers.get(user.id).roles.cache.map((role) => role.name);
         messageThatWasReactedOn = await reaction.message.channel.messages.fetch(reaction.message.id);
         const receivedEmbed = messageThatWasReactedOn.embeds[0];
         const usersTeam = getTeamFromRoles(roles, f1Teams);
@@ -170,6 +170,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
             id: user.id,
             nickname,
         };
+
+        console.log(nickname + ' ' + usersTeam);
 
         if (usersTeam) {
             if (!raceGrid) {
