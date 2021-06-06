@@ -8,7 +8,7 @@ const updateEmbedMessage = (embedMessage, raceGrid) => {
         ...raceGrid.map((team) => {
             return {
                 name: `${getEmoji(team.name)} ${team.name}`,
-                value: team.drivers.length > 0 ? team.drivers.map((driver) => driver.username).join('\n') : '-',
+                value: team.drivers.length > 0 ? team.drivers.map((driver) => driver.nickname).join('\n') : '-',
                 inline: team.inline,
             }
         })
@@ -75,7 +75,7 @@ const mapFieldsToGrid = (embedMessage, guildMembers) => {
                 if (memberFound) {
                     return {
                         id: memberFound.user.id,
-                        username: memberFound.nickname.split(' - ')[0],
+                        nickname: memberFound.nickname,
                     }
                 }
             }).filter((driver) => driver !== undefined),
@@ -149,6 +149,10 @@ const shouldEndVote = (nextTrack) => {
 
 const getDays = (days) => days * 1000 * 3600 * 24;
 
+const getTeamFromRoles = (roles, teams) => {
+    return roles.find((role) => teams.map((team) => team.name).indexOf(role) > -1 || role === 'Reserve');
+}
+
 exports.getChannel = getChannel;
 exports.getRoleId = getRoleId;
 exports.updateEmbedMessage = updateEmbedMessage;
@@ -161,3 +165,4 @@ exports.mapTeamsToGrid = mapTeamsToGrid;
 exports.getNextTrack = getNextTrack;
 exports.shouldEndVote = shouldEndVote;
 exports.getEmoji = getEmoji;
+exports.getTeamFromRoles = getTeamFromRoles;
