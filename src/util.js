@@ -8,7 +8,7 @@ const updateEmbedMessage = (embedMessage, raceGrid) => {
         ...raceGrid.map((team) => {
             return {
                 name: `${getEmoji(team.name)} ${team.name}`,
-                value: team.drivers.length > 0 ? team.drivers.map((driver) => driver.username).join('\n') : '-',
+                value: team.drivers.length > 0 ? team.drivers.map((driver) => driver.nickname).join('\n') : '-',
                 inline: team.inline,
             }
         })
@@ -75,7 +75,7 @@ const mapFieldsToGrid = (embedMessage, guildMembers) => {
                 if (memberFound) {
                     return {
                         id: memberFound.user.id,
-                        username: memberFound.nickname,
+                        nickname: memberFound.nickname,
                     }
                 }
             }).filter((driver) => driver !== undefined),

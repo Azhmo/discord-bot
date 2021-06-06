@@ -168,7 +168,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
         const isReserve = usersTeam === 'Reserve';
         const userWhoVoted = {
             id: user.id,
-            username: nickname,
+            nickname,
         };
 
         if (usersTeam) {
