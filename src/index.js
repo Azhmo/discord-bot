@@ -161,6 +161,7 @@ client.on('messageReactionAdd', async (reaction, user) => {
     if (reaction.message.channel.name === racePollChannel && !user.bot && !votingFinished) {
         const guildMembers = reaction.message.guild.members.cache
         const nickname = guildMembers.get(user.id).nickname;
+        const discordUsername = user.username;
         const roles = guildMembers.get(user.id).roles.cache.map((role) => role.name);
         messageThatWasReactedOn = await reaction.message.channel.messages.fetch(reaction.message.id);
         const receivedEmbed = messageThatWasReactedOn.embeds[0];
@@ -168,10 +169,8 @@ client.on('messageReactionAdd', async (reaction, user) => {
         const isReserve = usersTeam === 'Reserve';
         const userWhoVoted = {
             id: user.id,
-            nickname,
+            nickname: nickname || discordUsername, //some users don't have nickname as it's null if nickname is same as username
         };
-
-        console.log(nickname + ' ' + usersTeam);
 
         if (usersTeam) {
             if (!raceGrid) {
