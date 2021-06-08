@@ -65,17 +65,19 @@ const mapFieldsToGrid = (embedMessage, guildMembers) => {
             name: field.name.indexOf('<:') > -1 ? field.name.split('>')[1].trim() : (field.name.split(':')[2] ? field.name.split(':')[2].trim() : field.name),
             //find driver id and username
             drivers: drivers.map((driver) => {
+                let usernameToLookFor;
                 const memberFound = guildMembers.find((member) => {
+                    usernameToLookFor = member.nickname || member.user.username;
                     //check if there is a '-' as empty driver
-                    if (member.nickname && driver !== '-') {
-                        return member.nickname.indexOf(driver) > -1;
+                    if (usernameToLookFor && driver !== '-') {
+                        return usernameToLookFor.indexOf(driver) > -1;
                     }
                 })
 
                 if (memberFound) {
                     return {
                         id: memberFound.user.id,
-                        nickname: memberFound.nickname,
+                        nickname: usernameToLookFor,
                     }
                 }
             }).filter((driver) => driver !== undefined),
