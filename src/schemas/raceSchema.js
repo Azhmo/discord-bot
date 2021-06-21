@@ -7,6 +7,6 @@ const raceSchema = new mongoose.Schema({
 })
 
 
-const model = mongoose.model("Race", racePollSchema);
+const model = mongoose.model("Race", raceSchema);
 
 module.exports = model;

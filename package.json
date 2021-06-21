@@ -1,7 +1,7 @@
 {
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start server": "node -r dotenv/config src/server.js"
+        "start-server": "node -r dotenv/config src/server.js"
     },
     "dependencies": {
         "dotenv": "8.2.0",
