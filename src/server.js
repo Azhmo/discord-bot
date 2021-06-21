@@ -45,6 +45,16 @@ app.post('/api/addTrack', async (req, res) => {
     }
 })
 
+app.get('/api/tracks', async (req, res) => {
+    try {
+        await raceModel.find({}, (err, result) => {
+            res.send(result);
+        });
+    } catch (err) {
+        res.status(500).send(err);
+    }
+})
+
 app.listen(port, () => {
     console.log(`Listening on port ${port}`);
 })
