@@ -6,6 +6,7 @@ const cors = require('cors');
 const port = process.env.PORT || 8080;
 
 const raceModel = require('./schemas/raceSchema');
+const driverModel = require('./schemas/driverSchema');
 
 mongo().then(() => {
     try {
@@ -35,9 +36,18 @@ app.get('/', (req, res) => res.send('Welcome to Express'));
 app.post('/api/addTrack', async (req, res) => {
     try {
         await raceModel.findOneAndUpdate({ name: req.body.name }, {
-            name: req.body.name,
-            flag: req.body.flag,
-            date: req.body.date,
+            ...req.body
+        }, { upsert: true });
+        res.send(req.body)
+    } catch (err) {
+        res.status(500).send(err);
+    }
+})
+
+app.post('/api/addDriver', async (req, res) => {
+    try {
+        await driverModel.findOneAndUpdate({ name: req.body.name }, {
+            ...req.body
         }, { upsert: true });
         res.send(req.body)
     } catch (err) {
