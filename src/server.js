@@ -56,11 +56,39 @@ app.post('/api/addDriver', async (req, res) => {
     }
 })
 
+app.post('/api/addDrivers', async (req, res) => {
+    const drivers = req.body;
+    try {
+        drivers.forEach(async (driver) => {
+            await driverModel.findOneAndUpdate({ name: driver.name }, {
+                ...driver
+            }, { upsert: true });
+        })
+        res.send(req.body);
+    } catch (err) {
+        res.status(500).send(err);
+    }
+})
+
 app.post('/api/addTeam', async (req, res) => {
     try {
         await teamModel.findOneAndUpdate({ name: req.body.name }, {
             ...req.body
         }, { upsert: true });
+        res.send(req.body)
+    } catch (err) {
+        res.status(500).send(err);
+    }
+})
+
+app.post('/api/addTeams', async (req, res) => {
+    const teams = req.body;
+    try {
+        teams.forEach(async (team) => {
+            await teamModel.findOneAndUpdate({ name: team.name }, {
+                ...team
+            }, { upsert: true });
+        })
         res.send(req.body)
     } catch (err) {
         res.status(500).send(err);
