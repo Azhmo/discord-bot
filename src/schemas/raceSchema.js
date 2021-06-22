@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const raceSchema = new mongoose.Schema({
-    name: { type: String, require: true, unique: true },
-    flag: { type: String, require: true, unique: true },
+    name: { type: String, required: true, unique: true },
+    flag: { type: String, required: true, unique: true },
     date: { type: String }
 })
 

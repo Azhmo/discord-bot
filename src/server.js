@@ -7,6 +7,7 @@ const port = process.env.PORT || 8080;
 
 const raceModel = require('./schemas/raceSchema');
 const driverModel = require('./schemas/driverSchema');
+const teamModel = require('./schemas/teamSchema');
 
 mongo().then(() => {
     try {
@@ -55,6 +56,17 @@ app.post('/api/addDriver', async (req, res) => {
     }
 })
 
+app.post('/api/addTeam', async (req, res) => {
+    try {
+        await teamModel.findOneAndUpdate({ name: req.body.name }, {
+            ...req.body
+        }, { upsert: true });
+        res.send(req.body)
+    } catch (err) {
+        res.status(500).send(err);
+    }
+})
+
 app.get('/api/tracks', async (req, res) => {
     try {
         await raceModel.find({}, (err, result) => {
@@ -68,6 +80,15 @@ app.get('/api/tracks', async (req, res) => {
 app.get('/api/drivers', async (req, res) => {
     try {
         await driverModel.find({}, (err, result) => {
+            res.send(result);
+        });
+    } catch (err) {
+        res.status(500).send(err);
+    }
+})
+app.get('/api/teams', async (req, res) => {
+    try {
+        await teamModel.find({}, (err, result) => {
             res.send(result);
         });
     } catch (err) {
