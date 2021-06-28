@@ -34,7 +34,7 @@ app.use((req, res, next) => {
 
 app.get('/', (req, res) => res.send('Welcome to Express'));
 
-app.post('/api/addTrack', async (req, res) => {
+app.post('/api/track', async (req, res) => {
     try {
         await raceModel.findOneAndUpdate({ name: req.body.name }, {
             ...req.body
@@ -45,11 +45,23 @@ app.post('/api/addTrack', async (req, res) => {
     }
 })
 
-app.post('/api/addDriver', async (req, res) => {
+app.post('/api/driver', async (req, res) => {
+    const driver = req.body;
     try {
-        await driverModel.findOneAndUpdate({ name: req.body.name }, {
+        await driverModel.findOneAndUpdate(driver._id ? { _id: req.body._id } : { name: driver.name }, {
             ...req.body
         }, { upsert: true });
+        res.send(req.body)
+    } catch (err) {
+        res.status(500).send(err);
+    }
+})
+
+app.delete('/api/driver/:id', async (req, res) => {
+    try {
+        await driverModel.remove({ _id: req.params.id }, {
+            ...req.body
+        });
         res.send(req.body)
     } catch (err) {
         res.status(500).send(err);
@@ -114,6 +126,17 @@ app.get('/api/drivers', async (req, res) => {
         res.status(500).send(err);
     }
 })
+
+app.get('/api/driver/:id', async (req, res) => {
+    try {
+        await driverModel.find({ _id: req.params.id }, (err, result) => {
+            res.send(result[0]);
+        });
+    } catch (err) {
+        res.status(500).send(err);
+    }
+})
+
 app.get('/api/teams', async (req, res) => {
     try {
         await teamModel.find({}, (err, result) => {
