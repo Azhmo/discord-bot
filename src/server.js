@@ -68,7 +68,7 @@ app.delete('/api/driver/:id', async (req, res) => {
     }
 })
 
-app.post('/api/addDrivers', async (req, res) => {
+app.post('/api/drivers', async (req, res) => {
     const drivers = req.body;
     try {
         drivers.forEach(async (driver) => {
