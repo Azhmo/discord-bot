@@ -117,6 +117,19 @@ app.get('/api/tracks', async (req, res) => {
     }
 })
 
+app.get('/api/nextTrack', async (req, res) => {
+    try {
+        await raceModel.find({}, (err, result) => {
+            const now = Date.now();
+            const nextTracks = result.filter((track) => new Date(track.date).getTime() > now);
+            const nextTracksOrderedByDate = nextTracks.sort((a, b) => a.date - b.date);
+            res.send(nextTracksOrderedByDate[0]);
+        });
+    } catch (err) {
+        res.status(500).send(err);
+    }
+})
+
 app.get('/api/drivers', async (req, res) => {
     try {
         await driverModel.find({}, (err, result) => {
