@@ -1,7 +1,11 @@
 const newRecruits = 'New Recruit';
-const reserves = 'Reserve';
-const drivers = 'Driver';
+const silverReserve = 'Silver Reserve';
+const silverDriver = 'Silver Driver';
+const goldDriver = 'Gold Driver';
+const goldReserve = 'Gold Reserve';
 
 exports.newRecruits = newRecruits;
-exports.reserves = reserves;
-exports.drivers = drivers;
+exports.silverReserve = silverReserve;
+exports.goldReserve = goldReserve;
+exports.goldDriver = goldDriver;
+exports.silverDriver = silverDriver;
