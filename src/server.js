@@ -117,11 +117,26 @@ app.get('/api/tracks', async (req, res) => {
     }
 })
 
-app.get('/api/nextTrack', async (req, res) => {
+app.get('/api/nextGoldTierTrack', async (req, res) => {
     try {
         await raceModel.find({}, (err, result) => {
+            const goldTierRaces = result.filter((track) => track.tier === 'gold');
             const now = Date.now();
-            const nextTracks = result.filter((track) => new Date(track.date).getTime() > now);
+            const nextTracks = goldTierRaces.filter((track) => new Date(track.date).getTime() > now);
+            const nextTracksOrderedByDate = nextTracks.sort((a, b) => a.date - b.date);
+            res.send(nextTracksOrderedByDate[0]);
+        });
+    } catch (err) {
+        res.status(500).send(err);
+    }
+})
+
+app.get('/api/nextSilverTierTrack', async (req, res) => {
+    try {
+        await raceModel.find({}, (err, result) => {
+            const silverTierRaces = result.filter((track) => track.tier === 'silver');
+            const now = Date.now();
+            const nextTracks = silverTierRaces.filter((track) => new Date(track.date).getTime() > now);
             const nextTracksOrderedByDate = nextTracks.sort((a, b) => a.date - b.date);
             res.send(nextTracksOrderedByDate[0]);
         });
