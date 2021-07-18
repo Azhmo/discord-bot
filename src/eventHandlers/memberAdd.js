@@ -20,4 +20,5 @@ module.exports = (client, member) => {
     member.roles.add(getRoleId(member.guild, newRecruits));
     //user mention only work in message content, not embed
     getChannelById(client, welcomeChannel).send({ embed: welcomeMessage, content: `Welcome <@${member.user.id}> to **${member.guild.name}** !` });
+    client.users.cache.get(member.user.id).send(`Welcome to **${member.guild.name}** !\nYou need to fill this form to have a place on the grid: https://forms.gle/hWuyLnq5ww4ebsBd8`);
 }

@@ -1,6 +1,6 @@
 const { getChannelById, getEmbedFieldValueFromName, getRoleId } = require('./../util');
-const { formRegistrationsChannel } = require('./../channels');
-const { silverReserve, goldReserve, newRecruits } = require('./../roles');
+const { formRegistrationsChannel, generalChat } = require('./../channels');
+const { silverReserve, newRecruits } = require('./../roles');
 
 module.exports = async (client, message) => {
     if (message.channel.id === formRegistrationsChannel) {
@@ -11,7 +11,6 @@ module.exports = async (client, message) => {
         );
         member.setNickname(`${xboxGamertag}`);
         await member.roles.add(getRoleId(message.guild, silverReserve));
-        await member.roles.add(getRoleId(message.guild, goldReserve));
         await member.roles.remove(getRoleId(message.guild, newRecruits));
 
         getChannelById(client, generalChat).send(`Let's give a warm welcome to our newest member, <@${member.user.id}> !`);
