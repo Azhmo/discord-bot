@@ -97,7 +97,7 @@ app.post('/api/addTeams', async (req, res) => {
     const teams = req.body;
     try {
         teams.forEach(async (team) => {
-            await teamModel.findOneAndUpdate({ name: team.name }, {
+            await teamModel.findOneAndUpdate({ name: team.name, tier: team.tier }, {
                 ...team
             }, { upsert: true });
         })

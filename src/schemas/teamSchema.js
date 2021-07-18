@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 
 const teamSchema = new mongoose.Schema({
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
     gain: { type: Number, required: true },
-    points: { type: Number, required: true }
+    points: { type: Number, required: true },
+    tier: { type: String, required: true },
 })
 
 
