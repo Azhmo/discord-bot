@@ -36,8 +36,8 @@ app.get('/', (req, res) => res.send('Welcome to Express'));
 
 app.post('/api/track', async (req, res) => {
     try {
-        await raceModel.findOneAndUpdate({ name: req.body.name }, {
-            ...req.body
+        await raceModel.findOneAndUpdate({ name: req.body.name, tier: req.body.tier }, {
+            ...req.body,
         }, { upsert: true });
         res.send(req.body)
     } catch (err) {
